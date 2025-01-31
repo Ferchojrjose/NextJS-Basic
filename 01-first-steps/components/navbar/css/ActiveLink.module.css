@@ -1,0 +1,15 @@
+.link {
+        /* text-decoration: underline; */
+        color: inherit;
+        margin-right: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .link:hover {
+        text-decoration: underline;
+        color: #60a5fa; /* blue-400 */
+}
+
+.active-link {
+    color: #3b82f6; /* blue-500 */
+}
