@@ -1,13 +1,36 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Pokemon } from "@/pokemons";
+import { Pokemon, PokemonsResponse } from "@/pokemons";
 
 
 //* This interface is used to define the props of the page
 interface Props {
-    params: { id: string };
+    params: { name: string };
 
+}
+
+
+
+//* This function is used to generate the metadata for the page
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+
+    try {
+
+        const { id, name } = await getPokemon(params.name);
+
+        return {
+            title: `Pokemon: ${name}`,
+            description: `This is the page of the pokemon ${name}`,
+        };
+
+    } catch (error) {
+
+        return {
+            title: 'Pokemon not found',
+            description: 'The pokemon you are looking for does not exist',
+        };
+    }
 }
 
 
@@ -15,23 +38,27 @@ interface Props {
 //* Funcion para generar los parametros estaticos, paginas de pokemons
 export async function generaStaticParams() {
 
-    //* This function is used to generate 151 statics parameters for the page
-    const static151Pokemons = Array.from({ length: 151 }, (_, i) => `${i} + 1`);
 
-    return static151Pokemons.map((id) => ({ id: id })); //* Return an array of objects with the id of the 151 pokemons
+    const data: PokemonsResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/?limit=151`)
+        .then(res => res.json());
 
-    // Esta funcion unicamente se ve en el build time
+    const static151Pokemons = data.results.map((pokemon) => {
+        return {
+            name: pokemon.name,
+        }
+    });
 
+    return static151Pokemons.map(({ name }) => ({ name: name }));
 }
 
 
 
 //* This function is used to fetch the data from the API
-const getPokemon = async (id: string): Promise<Pokemon> => {
+const getPokemon = async (name: string): Promise<Pokemon> => {
 
     try {
 
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
             // cache: 'force-cache', // TODO: change this line
             next: {
                 revalidate: 60 * 60 * 30 * 6,
@@ -48,32 +75,9 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
 
 
 
-//* This function is used to generate the metadata for the page
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-
-    const pokemon = await getPokemon(params.id);
-
-    try {
-
-        return {
-            title: `Pokemon: ${pokemon.name}`,
-            description: `This is the page of the pokemon ${pokemon.name}`,
-        };
-
-    } catch (error) {
-
-        return {
-            title: 'Pokemon not found',
-            description: 'The pokemon you are looking for does not exist',
-        };
-    }
-}
-
-
-
 export default async function PokemonPage({ params }: Props) {
 
-    const pokemon = await getPokemon(params.id);
+    const pokemon = await getPokemon(params.name);
 
 
     return (
