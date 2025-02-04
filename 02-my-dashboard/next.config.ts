@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         protocol: "https", // The protocol of the remote image
         hostname: "images.unsplash.com", // The hostname of the remote image
       },
+      {
+        protocol: "https", // The protocol of the remote image
+        hostname: "raw.githubusercontent.com", // The host of the remote image
+      },
     ]
   }
 };
